@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A plain-English guide to CLIP Meets DINO / NoLA and a reliability-aware extension.">
+  <meta name="description" content="A plain-English guide to CLIP Meets DINO / NoLA, including its figures, results, and open research questions.">
   <meta name="theme-color" content="#fbfaf7">
   <meta property="og:title" content="CLIP Meets DINO / NoLA — reading notes">
   <meta property="og:description" content="A plain-English walkthrough of label-free visual adaptation with CLIP and DINO.">
@@ -20,6 +20,7 @@
     <nav aria-label="Article navigation">
       <a href="#map">Concept map</a>
       <a href="#method">Method</a>
+      <a href="#visuals">Figures</a>
       <a href="#videos">Videos</a>
     </nav>
   </header>
@@ -35,6 +36,7 @@
         <li><a href="#foundations">Minimal foundations</a></li>
         <li><a href="#method">How NoLA works</a></li>
         <li><a href="#evidence">Paper results</a></li>
+        <li><a href="#visuals">Figures and tables</a></li>
         <li><a href="#extension">What to explore</a></li>
         <li><a href="#videos">Videos</a></li>
         <li><a href="#resources">Files and links</a></li>
@@ -46,7 +48,7 @@
         <p class="kicker">Paper reading notes · BMVC 2025</p>
         <h1>CLIP Meets DINO, explained simply</h1>
         <p class="subtitle">How two vision models can teach each other when we have images, class names, and no image labels.</p>
-        <p class="byline">By <a href="https://github.com/Chippy1520">Chathuka Elapatha</a> · About 12 minutes to read</p>
+        <p class="byline">By <a href="https://github.com/Chippy1520">Chathuka Elapatha</a> · About 16 minutes to read</p>
 
         <details class="mobile-toc">
           <summary>Jump to a section</summary>
@@ -58,6 +60,7 @@
             <li><a href="#foundations">Minimal foundations</a></li>
             <li><a href="#method">How NoLA works</a></li>
             <li><a href="#evidence">Paper results</a></li>
+            <li><a href="#visuals">Figures and tables</a></li>
             <li><a href="#extension">What to explore</a></li>
             <li><a href="#videos">Videos</a></li>
             <li><a href="#resources">Files and links</a></li>
@@ -247,6 +250,73 @@
         </div>
         <p class="note"><strong>Important:</strong> these are values reported by the NoLA authors. They are not results reproduced in this repository yet.</p>
         <p>The average is useful, but individual datasets tell a more honest story. NoLA reports a large improvement on the texture dataset DTD, while on EuroSAT it is slightly below LaFTer. A good reproduction should explain both successes and failures.</p>
+      </section>
+
+      <section id="visuals">
+        <p class="section-label">Read the evidence, not only the caption</p>
+        <h2>How to read the paper's figures and tables</h2>
+        <p>The figures answer three different questions: <em>Does NoLA improve accuracy?</em>, <em>How does information move through the method?</em>, and <em>Do the adapted features look more separable?</em> They are useful only if we also understand what each visual cannot establish.</p>
+
+        <article class="visual-note">
+          <p class="visual-number">Figure 1 · accuracy radar chart</p>
+          <h3>Compare points on each spoke—not the coloured area</h3>
+          <p>Each spoke is one dataset, and a point farther from the centre means higher top-1 accuracy. Every coloured outline is a method. The light-blue NoLA outline reaches or approaches the outside on many spokes, giving a quick visual summary of its broad benchmark performance.</p>
+          <div class="reading-cues">
+            <p><strong>What it supports</strong>NoLA is competitive across varied image domains rather than improving only one benchmark.</p>
+            <p><strong>What to check</strong>Use Table 1 for exact values. Radar polygons overlap, and their total area can make differences look larger than the per-dataset numbers.</p>
+          </div>
+          <p class="caption-caveat"><strong>Caption detail:</strong> Figure 1 says “9 out of 10 datasets”, while the chart, Table 1, and the results text cover eleven datasets and report 9 out of 11. This appears to be a caption inconsistency.</p>
+        </article>
+
+        <article class="visual-note">
+          <p class="visual-number">Figure 2 · the method diagram</p>
+          <h3>Read it in build order: (a), then (b), then (c)</h3>
+          <figure class="paper-figure paper-figure-wide">
+            <img src="resources/figures/figure-2-pipeline.webp" width="1089" height="651" loading="lazy" alt="NoLA Figure 2 with three panels: class descriptions form a CDE classifier, selected CLIP predictions train a DINO adapter, and the adapted DINO network supervises CLIP visual prompts.">
+            <figcaption>Figure 2 from Imam et al. The snowflake means frozen, the flame means trainable, and the dashed purple box is the DINO-based labelling network.</figcaption>
+          </figure>
+          <ol class="panel-guide">
+            <li><strong>(a) Build the language-side classifier.</strong> Class names and question templates go to an LLM. Frozen CLIP text encoding turns the generated descriptions into vectors, which are averaged into one Class Description Embedding (CDE) per class.</li>
+            <li><strong>(b) Give DINO access to class names.</strong> Frozen CLIP and the CDE classifier score the unlabeled images. The most confident images per class become temporary training examples for the small adapter <em>h</em> on top of frozen DINO.</li>
+            <li><strong>(c) Adapt CLIP without changing its large backbone.</strong> The trained DINO branch labels a weak view of an image. That pseudo-label supervises the CDE classifier and CLIP visual prompts on a strongly altered view of the same image.</li>
+          </ol>
+          <div class="reading-cues">
+            <p><strong>Main reading trick</strong>Follow where each pseudo-label comes from. CLIP/CDE teaches the DINO adapter in (b); the adapted DINO branch then teaches prompted CLIP in (c).</p>
+            <p><strong>What it does not prove</strong>The arrows explain the design, not whether the pseudo-labels are correct. That requires measurements from the experiments.</p>
+          </div>
+        </article>
+
+        <article class="visual-note">
+          <p class="visual-number">Figure 3 · EuroSAT t-SNE plots</p>
+          <h3>Separated colour groups are encouraging, but qualitative</h3>
+          <figure class="paper-figure">
+            <img src="resources/figures/figure-3-tsne.webp" width="732" height="354" loading="lazy" alt="Two t-SNE plots of EuroSAT image embeddings. Base CLIP embeddings overlap heavily on the left; NoLA-adapted CLIP embeddings form more distinct coloured groups on the right.">
+            <figcaption>Figure 3 from Imam et al. Each dot is an image embedding projected from a high-dimensional space onto a two-dimensional page.</figcaption>
+          </figure>
+          <p>On the left, many class colours mix in the base CLIP representation. On the right, NoLA's adapted embeddings form more distinct groups. This is consistent with easier classification because images from the same class appear closer and different classes appear farther apart.</p>
+          <div class="reading-cues">
+            <p><strong>What it supports</strong>NoLA appears to reorganise EuroSAT features into cleaner local class groups.</p>
+            <p><strong>What it cannot prove</strong>t-SNE distorts distances, depends on its settings and random seed, and shows only one dataset. Accuracy, calibration, and repeated runs remain necessary.</p>
+          </div>
+          <p class="caption-caveat">The colours use class identity to make the evaluation plot readable; they should not be confused with labels supplied during NoLA training.</p>
+        </article>
+
+        <h3 class="table-guide-title">What each results table is trying to isolate</h3>
+        <div class="table-wrap paper-table-guide">
+          <table>
+            <thead><tr><th>Paper table</th><th>Question it asks</th><th>How to interpret it</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Table 1</strong><br>Main benchmark</td><td>Does NoLA improve label-free classification across datasets?</td><td>The eleven-dataset average rises from 64.7% for zero-shot CLIP and 73.0% for LaFTer to 76.6% for NoLA. Read each dataset too: NoLA is not best everywhere.</td></tr>
+              <tr><td><strong>Table 2</strong><br>Different CLIP backbone</td><td>Does the result persist with CLIP ViT-B/16?</td><td>NoLA averages 82.9% over six datasets, close to AdaptCLIPZS at 83.0%. The comparison is not supervision-matched: AdaptCLIPZS uses 16 labeled examples per class.</td></tr>
+              <tr><td><strong>Table 3</strong><br>Design alternatives</td><td>Does the DINO-based labelling branch add value?</td><td>Full NoLA reaches 80.5%; replacing DINO with CLIP gives 77.8%, and replacing the labelling network with CDE gives 76.2%. This supports the chosen combination, but only as a six-dataset average.</td></tr>
+              <tr><td><strong>Table 4</strong><br>Trainable parts</td><td>Should the visual prompts and CDE classifier both learn?</td><td>Training neither, prompts only, and CDE only gives 77.9%, 78.2%, and 79.6%; training both gives 80.5%. Their joint update works best in this ablation.</td></tr>
+              <tr><td><strong>Table 5</strong><br>Additive pipeline</td><td>What happens as components are added in sequence?</td><td>The average moves 67.9 → 72.0 → 73.9 → 80.5 as CDE, the DINO labelling network, and prompt learning are added. These are sequential gains, not independent causal contributions.</td></tr>
+              <tr><td><strong>Table 6</strong><br>Other SSL models</td><td>Is DINO the only image-only backbone that helps?</td><td>MAE and BEiT also improve over the shown CLIP baseline, averaging 76.6% and 74.9%; DINO is strongest at 80.5%. The idea extends beyond DINO among the tested models.</td></tr>
+              <tr><td><strong>Table 7</strong><br>LLM descriptions</td><td>Do richer GPT-4o descriptions improve the result?</td><td>The ten-dataset average increases from 77.77% to 78.49%, a 0.72-point gain, but several individual datasets decline. Better average language descriptions do not help every visual domain.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note"><strong>Evidence boundary:</strong> all values above are reported by the NoLA authors. The diagrams explain the mechanism, while the tables supply the numerical evidence; neither replaces independent reproduction.</p>
       </section>
 
       <section id="extension">

@@ -126,6 +126,22 @@ pre { overflow-x: auto; margin: 1.6rem 0; padding: 1.2rem 1.3rem; background: #2
 .plain-pipeline b { color: var(--accent); }
 figcaption { max-width: 760px; margin: .75rem auto 0; color: var(--muted); font-size: .78rem; text-align: center; }
 
+.visual-note { margin-top: 2.8rem; padding-top: 2rem; border-top: 2px solid var(--ink); }
+.visual-note h3 { margin-top: .25rem; font-family: Georgia, "Times New Roman", serif; font-size: 1.5rem; }
+.visual-number { margin: 0; color: var(--accent-dark); font-size: .72rem; font-weight: 750; text-transform: uppercase; letter-spacing: .09em; }
+.paper-figure { margin: 2rem 0; }
+.paper-figure img { display: block; width: 100%; height: auto; background: white; border: 1px solid var(--line); }
+.paper-figure-wide { width: min(1040px, calc(100vw - 3rem)); margin: 2rem 50%; transform: translateX(-50%); }
+.reading-cues { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin: 1.6rem 0; background: var(--line); border: 1px solid var(--line); }
+.reading-cues p { margin: 0; padding: 1rem; background: white; font-size: .88rem; }
+.reading-cues strong { display: block; margin-bottom: .25rem; color: var(--accent-dark); font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; }
+.caption-caveat { color: var(--muted); font-size: .84rem; }
+.panel-guide { margin: 1.7rem 0; padding-left: 1.4rem; }
+.panel-guide li { margin: .9rem 0; padding-left: .25rem; }
+.table-guide-title { margin-top: 3.2rem; font-family: Georgia, "Times New Roman", serif; font-size: 1.5rem; }
+.paper-table-guide th:first-child { width: 19%; }
+.paper-table-guide th:nth-child(2) { width: 29%; }
+
 .table-wrap { overflow-x: auto; margin: 1.6rem 0; border-top: 2px solid var(--ink); }
 table { width: 100%; border-collapse: collapse; font-size: .9rem; line-height: 1.5; }
 th, td { padding: .85rem .7rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
@@ -157,7 +173,7 @@ th { background: var(--paper-raised); font-size: .78rem; text-transform: upperca
   body { font-size: 17px; line-height: 1.7; }
   .topbar { align-items: flex-start; padding: .85rem 1rem; }
   .topbar nav { gap: .8rem; }
-  .topbar nav a:first-child { display: none; }
+  .topbar nav a:first-child, .topbar nav a:last-child { display: none; }
   .page-shell { padding: 0 1rem; }
   .article-header { padding: 3.8rem 0 3rem; }
   h1 { font-size: clamp(2.65rem, 13vw, 4rem); }
@@ -171,6 +187,8 @@ th { background: var(--paper-raised); font-size: .78rem; text-transform: upperca
   .wide-figure { width: calc(100vw - 2rem); }
   .plain-pipeline { align-items: stretch; flex-direction: column; padding: 1rem; }
   .plain-pipeline b { align-self: center; transform: rotate(90deg); }
+  .paper-figure-wide { width: calc(100vw - 2rem); }
+  .reading-cues { grid-template-columns: 1fr; }
   .video-list { grid-template-columns: 1fr; gap: 2.8rem; }
   .video-list article:last-child { grid-column: auto; }
   th, td { min-width: 120px; }
@@ -183,6 +201,15 @@ th { background: var(--paper-raised); font-size: .78rem; text-transform: upperca
   .exploration-table td:nth-child(1)::before { content: "Possible weakness"; }
   .exploration-table td:nth-child(2)::before { content: "Smallest useful test"; }
   .exploration-table td:nth-child(3)::before { content: "Feasibility"; }
+  .paper-table-guide { overflow: visible; border-top: 0; }
+  .paper-table-guide thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .paper-table-guide table, .paper-table-guide tbody, .paper-table-guide tr, .paper-table-guide td { display: block; }
+  .paper-table-guide tr { margin-bottom: 1rem; background: white; border-top: 2px solid var(--ink); }
+  .paper-table-guide td { min-width: 0; padding: .75rem; }
+  .paper-table-guide td::before { display: block; margin-bottom: .2rem; color: var(--muted); font-size: .68rem; font-weight: 750; text-transform: uppercase; letter-spacing: .06em; }
+  .paper-table-guide td:nth-child(1)::before { content: "Paper table"; }
+  .paper-table-guide td:nth-child(2)::before { content: "Question it asks"; }
+  .paper-table-guide td:nth-child(3)::before { content: "How to interpret it"; }
 }
 
 @media (prefers-reduced-motion: reduce) {
