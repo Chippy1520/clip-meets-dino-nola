@@ -24,13 +24,41 @@
     </nav>
   </header>
 
-  <main id="content">
-    <article id="top">
+  <main class="page-shell" id="content">
+    <aside class="toc" aria-label="On this page">
+      <p>On this page</p>
+      <ol>
+        <li><a href="#idea">One-minute summary</a></li>
+        <li><a href="#problem">Why it matters</a></li>
+        <li><a href="#concepts">Small ideas first</a></li>
+        <li><a href="#method">How NoLA works</a></li>
+        <li><a href="#evidence">Paper results</a></li>
+        <li><a href="#extension">Our question</a></li>
+        <li><a href="#videos">Videos</a></li>
+        <li><a href="#resources">Files and links</a></li>
+      </ol>
+    </aside>
+
+    <article class="paper" id="top">
       <header class="article-header">
         <p class="kicker">Paper reading notes · BMVC 2025</p>
         <h1>CLIP Meets DINO, explained simply</h1>
         <p class="subtitle">How two vision models can teach each other when we have images, class names, and no image labels.</p>
-        <p class="byline">Written and maintained by <a href="https://github.com/Chippy1520">Chathuka Elapatha</a></p>
+        <p class="byline">By <a href="https://github.com/Chippy1520">Chathuka Elapatha</a> · About 12 minutes to read</p>
+
+        <details class="mobile-toc">
+          <summary>Jump to a section</summary>
+          <ol>
+            <li><a href="#idea">One-minute summary</a></li>
+            <li><a href="#problem">Why it matters</a></li>
+            <li><a href="#concepts">Small ideas first</a></li>
+            <li><a href="#method">How NoLA works</a></li>
+            <li><a href="#evidence">Paper results</a></li>
+            <li><a href="#extension">Our question</a></li>
+            <li><a href="#videos">Videos</a></li>
+            <li><a href="#resources">Files and links</a></li>
+          </ol>
+        </details>
       </header>
 
       <section class="summary" id="idea">
@@ -45,14 +73,14 @@
         <blockquote>CLIP supplies the words. DINO supplies the visual detail. NoLA connects them without manually labeling the target images.</blockquote>
       </section>
 
-      <section>
+      <section id="problem">
         <h2>Why does this problem matter?</h2>
         <p>A normal image classifier needs many examples such as “this image is a forest” or “this image is a river”. Creating those labels costs time and money.</p>
         <p>CLIP can classify images from class names alone, but its visual features are not always ideal for specialised datasets. DINO learns strong visual structure, but it normally needs labeled examples before it can name the groups it sees.</p>
         <p>The paper asks whether we can combine their strengths while keeping the target image collection unlabeled.</p>
       </section>
 
-      <section>
+      <section id="concepts">
         <h2>Five small ideas to know first</h2>
         <dl class="glossary">
           <dt>Embedding</dt>
@@ -97,7 +125,7 @@
         </figure>
       </section>
 
-      <section>
+      <section id="learning">
         <h2>What is frozen, and what actually learns?</h2>
         <div class="table-wrap">
           <table>
@@ -131,7 +159,7 @@
         <p>The average is useful, but individual datasets tell a more honest story. NoLA reports a large improvement on the texture dataset DTD, while on EuroSAT it is slightly below LaFTer. A good reproduction should explain both successes and failures.</p>
       </section>
 
-      <section>
+      <section id="extension">
         <h2>The weak point we want to study</h2>
         <p>NoLA initially selects pseudo-labels using classifier confidence. But neural networks can be <strong>confidently wrong</strong>, especially when the target images differ from their pretraining data.</p>
         <p>Our proposed extension is called <strong>DINO-Neighbourhood Confidence (DNC)</strong>. It asks two questions before trusting an image:</p>
@@ -145,7 +173,7 @@
         <p>This is a hypothesis, not a claimed improvement. It must be tested against confidence-only selection, random selection, and a shuffled-neighbour control using the same sample budget.</p>
       </section>
 
-      <section>
+      <section id="reading">
         <h2>How I recommend reading the paper</h2>
         <ol>
           <li><strong>First pass:</strong> abstract, Figure 2, conclusion. Only identify the input, three stages, and output.</li>
