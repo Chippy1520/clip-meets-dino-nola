@@ -18,9 +18,9 @@
   <header class="topbar">
     <a href="#top">CLIP Meets DINO / NoLA</a>
     <nav aria-label="Article navigation">
+      <a href="#map">Concept map</a>
       <a href="#method">Method</a>
       <a href="#videos">Videos</a>
-      <a href="#resources">Files</a>
     </nav>
   </header>
 
@@ -29,8 +29,10 @@
       <p>On this page</p>
       <ol>
         <li><a href="#idea">One-minute summary</a></li>
-        <li><a href="#problem">Why it matters</a></li>
-        <li><a href="#concepts">Small ideas first</a></li>
+        <li><a href="#map">Concept map</a></li>
+        <li><a href="#problem">The problem</a></li>
+        <li><a href="#concepts">CLIP and DINO</a></li>
+        <li><a href="#foundations">Minimal foundations</a></li>
         <li><a href="#method">How NoLA works</a></li>
         <li><a href="#evidence">Paper results</a></li>
         <li><a href="#extension">Our question</a></li>
@@ -50,8 +52,10 @@
           <summary>Jump to a section</summary>
           <ol>
             <li><a href="#idea">One-minute summary</a></li>
-            <li><a href="#problem">Why it matters</a></li>
-            <li><a href="#concepts">Small ideas first</a></li>
+            <li><a href="#map">Concept map</a></li>
+            <li><a href="#problem">The problem</a></li>
+            <li><a href="#concepts">CLIP and DINO</a></li>
+            <li><a href="#foundations">Minimal foundations</a></li>
             <li><a href="#method">How NoLA works</a></li>
             <li><a href="#evidence">Paper results</a></li>
             <li><a href="#extension">Our question</a></li>
@@ -73,31 +77,117 @@
         <blockquote>CLIP supplies the words. DINO supplies the visual detail. NoLA connects them without manually labeling the target images.</blockquote>
       </section>
 
+      <section id="map">
+        <p class="section-label">Start here</p>
+        <h2>The knowledge map</h2>
+        <p>Read this map from top to bottom. The top is the idea we want to understand. Each lower row contains only the background needed to make the row above it make sense. The farther we move from NoLA, the less detail we need.</p>
+
+        <div class="knowledge-graph" role="img" aria-label="NoLA depends on CLIP and DINO. CLIP depends on vision and language transformers. DINO depends on a vision transformer and self-supervised learning. These use tokens, attention, and embeddings as basic ideas.">
+          <div class="graph-level graph-root">
+            <div class="graph-node">
+              <small>Root idea · understand this well</small>
+              <strong>NoLA</strong>
+              <span>CLIP gives names to images; DINO helps make those guesses visually reliable.</span>
+            </div>
+          </div>
+
+          <p class="graph-connector" aria-hidden="true">needs ↓</p>
+
+          <div class="graph-level graph-pair">
+            <div class="graph-node">
+              <small>Direct prerequisite</small>
+              <strong>CLIP</strong>
+              <span>Connects pictures with language.</span>
+            </div>
+            <div class="graph-node">
+              <small>Direct prerequisite</small>
+              <strong>DINO</strong>
+              <span>Finds visual similarity without class names.</span>
+            </div>
+          </div>
+
+          <p class="graph-connector" aria-hidden="true">built from ↓</p>
+
+          <div class="graph-level graph-pair graph-secondary">
+            <div class="graph-node">
+              <small>Inside CLIP</small>
+              <strong>Vision + language transformers</strong>
+              <span>One reads image patches; the other reads word pieces.</span>
+            </div>
+            <div class="graph-node">
+              <small>Inside DINO</small>
+              <strong>Vision transformer + self-teaching</strong>
+              <span>A teacher and student learn from different views of the same image.</span>
+            </div>
+          </div>
+
+          <p class="graph-connector" aria-hidden="true">minimum foundations ↓</p>
+
+          <div class="graph-level graph-foundations">
+            <div class="graph-node"><strong>Tokens</strong><span>Small pieces of an image or sentence.</span></div>
+            <div class="graph-node"><strong>Attention</strong><span>A way to decide which pieces matter together.</span></div>
+            <div class="graph-node"><strong>Embeddings</strong><span>Number-based summaries that can be compared.</span></div>
+          </div>
+        </div>
+
+        <p class="graph-key"><strong>Reading rule:</strong> know NoLA's flow clearly; understand what CLIP and DINO contribute; keep only a working intuition for transformers, attention, and tokens.</p>
+      </section>
+
       <section id="problem">
-        <h2>Why does this problem matter?</h2>
+        <p class="section-label">Context for the root idea</p>
+        <h2>Why does NoLA exist?</h2>
         <p>A normal image classifier needs many examples such as “this image is a forest” or “this image is a river”. Creating those labels costs time and money.</p>
         <p>CLIP can classify images from class names alone, but its visual features are not always ideal for specialised datasets. DINO learns strong visual structure, but it normally needs labeled examples before it can name the groups it sees.</p>
         <p>The paper asks whether we can combine their strengths while keeping the target image collection unlabeled.</p>
       </section>
 
       <section id="concepts">
-        <h2>Five small ideas to know first</h2>
+        <p class="section-label">One step away</p>
+        <h2>CLIP and DINO: the two helpers</h2>
+
+        <h3>CLIP connects pictures to words</h3>
+        <p>Suppose you show someone a photo and three cards labeled “dog”, “bus”, and “pizza”. Even if they have never seen that exact photo, they can choose the card whose meaning best matches it. CLIP does something similar with numbers.</p>
+        <p>CLIP has two readers:</p>
+        <ul>
+          <li>A <strong>vision transformer</strong> turns the picture into an embedding: a numerical summary of what the image seems to contain.</li>
+          <li>A <strong>language transformer</strong> turns each class description—such as “a photo of a dog”—into another embedding.</li>
+        </ul>
+        <p>CLIP compares those summaries. If the image summary is closest to the “dog” summary, CLIP predicts dog. This language connection is why CLIP can attach names to NoLA's unlabeled images.</p>
+
+        <h3>DINO notices visual structure</h3>
+        <p>Now imagine sorting photographs without reading their captions. You might place furry animals together, separate aircraft from birds, or group objects by shape and texture. DINO learns this kind of visual organisation.</p>
+        <p>During pretraining, DINO sees different crops or altered views of the same image. A student network learns to agree with a slowly updated teacher network. It therefore learns that two views can show the same underlying object. We do not need the training equations here; for NoLA, the important fact is that <strong>nearby DINO embeddings usually represent visually similar images</strong>.</p>
+
+        <p class="bridge"><strong>The connection:</strong> CLIP can say what an image might be. DINO can say which images look alike. NoLA uses both signals instead of trusting either one alone.</p>
+      </section>
+
+      <section id="foundations">
+        <p class="section-label">Two steps away · intuition is enough</p>
+        <h2>The minimum transformer vocabulary</h2>
+        <p>You do not need to understand transformer mathematics to follow NoLA. These short definitions are enough:</p>
         <dl class="glossary">
+          <dt>Token</dt>
+          <dd>A small input piece. A language transformer receives word pieces; a vision transformer receives small image patches.</dd>
+          <dt>Attention</dt>
+          <dd>A mechanism that lets each piece look at other pieces and decide which relationships are useful. In an image, a patch containing an ear may pay attention to patches containing fur and eyes.</dd>
           <dt>Embedding</dt>
-          <dd>A list of numbers that represents an image or sentence. Similar things should have similar lists.</dd>
+          <dd>A list of numbers that acts like a location on a meaning map. Similar images or sentences should end up near one another.</dd>
+          <dt>Transformer</dt>
+          <dd>A model that processes tokens using attention. For this article, think of it simply as a reader: one version reads image patches and another reads text tokens.</dd>
           <dt>Zero-shot classification</dt>
-          <dd>Recognising classes without training on labeled target images.</dd>
+          <dd>Choosing among class names without first training on labeled examples from the target image collection.</dd>
           <dt>Pseudo-label</dt>
-          <dd>A model's best guess used as a temporary training label. It can be wrong.</dd>
+          <dd>A model's guess used as a temporary label. It saves human work, but a wrong guess can teach the next model the wrong lesson.</dd>
           <dt>Adapter</dt>
-          <dd>A small trainable module placed on a frozen model. It is cheaper than retraining the whole model.</dd>
+          <dd>A small trainable attachment added to a large frozen model—like teaching a translator instead of retraining both speakers.</dd>
           <dt>Visual prompt</dt>
-          <dd>A few learnable tokens added to a Vision Transformer so it can adapt while most parameters remain frozen.</dd>
+          <dd>A few learnable tokens that gently steer a vision transformer toward the current task while the large model stays frozen.</dd>
         </dl>
       </section>
 
       <section id="method">
-        <h2>What NoLA does, step by step</h2>
+        <p class="section-label">Return to the root idea</p>
+        <h2>Now follow NoLA, step by step</h2>
 
         <h3>1. Make better class descriptions</h3>
         <p>Instead of representing “cat” using only the sentence “a photo of a cat”, the method uses several descriptions of what a cat looks like. CLIP converts every description into an embedding. Their average becomes a richer class prototype called the <strong>Class Description Embedding (CDE)</strong>.</p>

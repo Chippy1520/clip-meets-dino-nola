@@ -82,6 +82,7 @@ h2 { margin: 0 0 1.35rem; font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15
 h3 { margin: 2.5rem 0 .55rem; font-size: 1.2rem; line-height: 1.4; }
 p { margin: 0 0 1.3rem; }
 li { margin: .55rem 0; }
+.section-label { margin: 0 0 .45rem; color: var(--accent-dark); font-size: .72rem; font-weight: 750; text-transform: uppercase; letter-spacing: .1em; }
 blockquote { margin: 2rem 0 0; padding: 1.1rem 1.35rem; background: white; border-left: 4px solid var(--accent); font-family: Georgia, "Times New Roman", serif; font-size: 1.15rem; line-height: 1.6; }
 code, pre { font-family: "SFMono-Regular", Consolas, monospace; }
 code { font-size: .87em; }
@@ -89,6 +90,20 @@ pre { overflow-x: auto; margin: 1.6rem 0; padding: 1.2rem 1.3rem; background: #2
 
 .summary { margin-bottom: 1.2rem; padding: 2rem; background: var(--paper-raised); border: 1px solid var(--line); }
 .summary h2 { font-size: 1.75rem; }
+.knowledge-graph { margin: 2.4rem 0 1.6rem; padding: 1.4rem; background: var(--paper-raised); border: 1px solid var(--line); }
+.graph-level { display: grid; gap: .8rem; }
+.graph-root { max-width: 430px; margin: 0 auto; }
+.graph-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.graph-foundations { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.graph-node { display: flex; flex-direction: column; min-width: 0; padding: 1rem; background: white; border: 1px solid var(--line); line-height: 1.45; }
+.graph-root .graph-node { border: 2px solid var(--accent); }
+.graph-secondary .graph-node, .graph-foundations .graph-node { background: #f8f7f3; }
+.graph-node small { margin-bottom: .25rem; color: var(--accent-dark); font-size: .68rem; font-weight: 750; text-transform: uppercase; letter-spacing: .06em; }
+.graph-node strong { font-size: 1rem; }
+.graph-root strong { font-family: Georgia, "Times New Roman", serif; font-size: 1.55rem; }
+.graph-node span { margin-top: .25rem; color: var(--muted); font-size: .78rem; }
+.graph-connector { margin: .55rem 0; color: var(--muted); font-size: .68rem; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: .08em; }
+.graph-key, .bridge { padding: 1rem 1.15rem; background: white; border-left: 4px solid var(--accent); font-size: .92rem; }
 .glossary { margin: 0; }
 .glossary dt { margin-top: 1.3rem; font-weight: 750; }
 .glossary dd { margin: .25rem 0 0; color: var(--muted); }
@@ -148,6 +163,9 @@ th { background: var(--paper-raised); font-size: .78rem; text-transform: upperca
   section { padding: 2.8rem 0; }
   .summary { margin-inline: -.25rem; padding: 1.25rem; }
   .mobile-toc ol { columns: 1; }
+  .knowledge-graph { margin-inline: -.25rem; padding: .8rem; }
+  .graph-pair, .graph-foundations { grid-template-columns: 1fr; }
+  .graph-connector { margin: .4rem 0; }
   .wide-figure { width: calc(100vw - 2rem); }
   .plain-pipeline { align-items: stretch; flex-direction: column; padding: 1rem; }
   .plain-pipeline b { align-self: center; transform: rotate(90deg); }
