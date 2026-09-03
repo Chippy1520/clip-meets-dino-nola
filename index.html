@@ -35,7 +35,7 @@
         <li><a href="#foundations">Minimal foundations</a></li>
         <li><a href="#method">How NoLA works</a></li>
         <li><a href="#evidence">Paper results</a></li>
-        <li><a href="#extension">Our question</a></li>
+        <li><a href="#extension">What to explore</a></li>
         <li><a href="#videos">Videos</a></li>
         <li><a href="#resources">Files and links</a></li>
       </ol>
@@ -58,7 +58,7 @@
             <li><a href="#foundations">Minimal foundations</a></li>
             <li><a href="#method">How NoLA works</a></li>
             <li><a href="#evidence">Paper results</a></li>
-            <li><a href="#extension">Our question</a></li>
+            <li><a href="#extension">What to explore</a></li>
             <li><a href="#videos">Videos</a></li>
             <li><a href="#resources">Files and links</a></li>
           </ol>
@@ -250,17 +250,40 @@
       </section>
 
       <section id="extension">
-        <h2>The weak point we want to study</h2>
-        <p>NoLA initially selects pseudo-labels using classifier confidence. But neural networks can be <strong>confidently wrong</strong>, especially when the target images differ from their pretraining data.</p>
-        <p>Our proposed extension is called <strong>DINO-Neighbourhood Confidence (DNC)</strong>. It asks two questions before trusting an image:</p>
-        <ol>
-          <li>Is CLIP much more confident in its first choice than its second choice?</li>
-          <li>Do visually similar images in DINO space receive the same pseudo-label?</li>
-        </ol>
-        <p>If both answers are yes, the pseudo-label is probably safer. If CLIP is confident but nearby DINO images disagree, the example deserves less trust.</p>
-        <pre><code>reliability = α × semantic_margin
-            + (1 − α) × neighbour_agreement</code></pre>
-        <p>This is a hypothesis, not a claimed improvement. It must be tested against confidence-only selection, random selection, and a shuffled-neighbour control using the same sample budget.</p>
+        <p class="section-label">Open questions · not predetermined conclusions</p>
+        <h2>What could be explored next?</h2>
+        <p>NoLA reports strong average results, but an average does not tell us why the method succeeds or where it may fail. The useful next step is diagnosis—not choosing a favourite extension in advance.</p>
+
+        <div class="table-wrap exploration-table">
+          <table>
+            <thead><tr><th>Possible weakness</th><th>Smallest useful test</th><th>Feasibility</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Confident guesses may still be wrong.</strong><br>Domain-shifted images can look unfamiliar to CLIP even when its score is high.</td>
+                <td>Measure how often selected pseudo-labels are correct at different confidence levels. Use true labels only for evaluation.</td>
+                <td><strong>High.</strong> Requires predictions and labels for analysis, not a new training method.</td>
+              </tr>
+              <tr>
+                <td><strong>Hard top-k selection may be brittle.</strong><br>A suitable number of selected images may differ by dataset or class.</td>
+                <td>Repeat the same baseline with a few smaller and larger selection budgets while keeping everything else fixed.</td>
+                <td><strong>High.</strong> It is a small controlled sweep once the baseline runs.</td>
+              </tr>
+              <tr>
+                <td><strong>Results may depend on class descriptions.</strong><br>Some descriptions may help CLIP, while vague or misleading ones may hurt it.</td>
+                <td>Compare class names alone, all generated descriptions, and several description subsets.</td>
+                <td><strong>High.</strong> Text embeddings can be computed once and reused.</td>
+              </tr>
+              <tr>
+                <td><strong>Prompt tuning may reinforce early mistakes.</strong><br>If wrong pseudo-labels supervise CLIP, the final model may become more certain without becoming more correct.</td>
+                <td>Compare accuracy and calibration before and after prompt tuning, then inspect which classes gain or lose.</td>
+                <td><strong>Medium.</strong> The metrics are cheap, but a working NoLA training run is required first.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>A sensible decision path:</strong> first reproduce one baseline, then run these diagnostics. If confidence errors are the dominant issue, DINO-neighbour agreement becomes one candidate solution. If description sensitivity or selection budget matters more, a simpler intervention may be better.</p>
+        <p class="note"><strong>Research stance:</strong> these are plausible questions suggested by the method, not weaknesses already proven by our experiments.</p>
       </section>
 
       <section id="reading">
@@ -313,7 +336,7 @@
 
       <footer class="article-footer">
         <p>Based on Imam et al., <cite>CLIP meets DINO for Tuning Zero-Shot Classifier using Unlabeled Image Collections</cite>, BMVC 2025.</p>
-        <p>Research notes by <a href="https://www.linkedin.com/in/chathuka-elapatha-911827291/">Chathuka Elapatha</a>. Paper results and proposed project ideas are explicitly separated.</p>
+        <p>Research notes by <a href="https://www.linkedin.com/in/chathuka-elapatha-911827291/">Chathuka Elapatha</a>. Reported results and open research questions are explicitly separated.</p>
       </footer>
     </article>
   </main>
