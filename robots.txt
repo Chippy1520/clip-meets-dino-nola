@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chippy1520.github.io/clip-meets-dino-nola/sitemap.xml

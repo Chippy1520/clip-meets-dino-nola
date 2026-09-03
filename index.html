@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A plain-English guide to CLIP Meets DINO / NoLA and a reliability-aware extension.">
+  <meta name="theme-color" content="#fbfaf7">
+  <meta property="og:title" content="CLIP Meets DINO / NoLA — reading notes">
+  <meta property="og:description" content="A plain-English walkthrough of label-free visual adaptation with CLIP and DINO.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://chippy1520.github.io/clip-meets-dino-nola/">
+  <title>CLIP Meets DINO / NoLA — Chathuka Elapatha</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to article</a>
+
+  <header class="topbar">
+    <a href="#top">CLIP Meets DINO / NoLA</a>
+    <nav aria-label="Article navigation">
+      <a href="#method">Method</a>
+      <a href="#videos">Videos</a>
+      <a href="#resources">Files</a>
+    </nav>
+  </header>
+
+  <main id="content">
+    <article id="top">
+      <header class="article-header">
+        <p class="kicker">Paper reading notes · BMVC 2025</p>
+        <h1>CLIP Meets DINO, explained simply</h1>
+        <p class="subtitle">How two vision models can teach each other when we have images, class names, and no image labels.</p>
+        <p class="byline">Written and maintained by <a href="https://github.com/Chippy1520">Chathuka Elapatha</a></p>
+      </header>
+
+      <section class="summary" id="idea">
+        <h2>The whole paper in one minute</h2>
+        <p><strong>Imagine two children looking at the same box of pictures.</strong></p>
+        <ul>
+          <li><strong>CLIP</strong> has read many captions. It knows what words such as “forest”, “airplane”, and “cat” mean.</li>
+          <li><strong>DINO</strong> has become very good at noticing visual patterns. It can tell which pictures look alike, but it does not naturally attach class names to them.</li>
+        </ul>
+        <p>NoLA uses CLIP's language knowledge to give temporary names—<em>pseudo-labels</em>—to some unlabeled images. Those temporary labels teach a small adapter on top of DINO. The adapted DINO model then supplies better pseudo-labels for tuning CLIP's visual prompts.</p>
+        <p>In short:</p>
+        <blockquote>CLIP supplies the words. DINO supplies the visual detail. NoLA connects them without manually labeling the target images.</blockquote>
+      </section>
+
+      <section>
+        <h2>Why does this problem matter?</h2>
+        <p>A normal image classifier needs many examples such as “this image is a forest” or “this image is a river”. Creating those labels costs time and money.</p>
+        <p>CLIP can classify images from class names alone, but its visual features are not always ideal for specialised datasets. DINO learns strong visual structure, but it normally needs labeled examples before it can name the groups it sees.</p>
+        <p>The paper asks whether we can combine their strengths while keeping the target image collection unlabeled.</p>
+      </section>
+
+      <section>
+        <h2>Five small ideas to know first</h2>
+        <dl class="glossary">
+          <dt>Embedding</dt>
+          <dd>A list of numbers that represents an image or sentence. Similar things should have similar lists.</dd>
+          <dt>Zero-shot classification</dt>
+          <dd>Recognising classes without training on labeled target images.</dd>
+          <dt>Pseudo-label</dt>
+          <dd>A model's best guess used as a temporary training label. It can be wrong.</dd>
+          <dt>Adapter</dt>
+          <dd>A small trainable module placed on a frozen model. It is cheaper than retraining the whole model.</dd>
+          <dt>Visual prompt</dt>
+          <dd>A few learnable tokens added to a Vision Transformer so it can adapt while most parameters remain frozen.</dd>
+        </dl>
+      </section>
+
+      <section id="method">
+        <h2>What NoLA does, step by step</h2>
+
+        <h3>1. Make better class descriptions</h3>
+        <p>Instead of representing “cat” using only the sentence “a photo of a cat”, the method uses several descriptions of what a cat looks like. CLIP converts every description into an embedding. Their average becomes a richer class prototype called the <strong>Class Description Embedding (CDE)</strong>.</p>
+
+        <h3>2. Give a small set of images temporary labels</h3>
+        <p>The CDE classifier predicts a class for every unlabeled image. NoLA keeps the most confident examples from each class. Keeping the same number per class stops easy or common classes from taking the entire training set.</p>
+
+        <h3>3. Teach DINO how to use the class names</h3>
+        <p>DINO already produces strong visual features. A small adapter learns to map those features toward the CLIP/CDE class space using the selected pseudo-labels. The DINO backbone stays frozen.</p>
+
+        <h3>4. Use DINO to tune CLIP</h3>
+        <p>The adapted DINO model predicts labels for weakly augmented images. When a prediction is confident enough, that label supervises CLIP on a strongly augmented version of the same image. Only CLIP's visual prompt tokens are updated.</p>
+
+        <figure class="wide-figure" aria-labelledby="pipeline-caption">
+          <div class="plain-pipeline">
+            <span>Class descriptions</span>
+            <b>→</b>
+            <span>CLIP/CDE pseudo-labels</span>
+            <b>→</b>
+            <span>DINO adapter</span>
+            <b>→</b>
+            <span>CLIP visual prompts</span>
+          </div>
+          <figcaption id="pipeline-caption">The paper's main flow. Large pretrained encoders remain frozen; only small adaptation components are learned.</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h2>What is frozen, and what actually learns?</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Component</th><th>Role</th><th>Updated?</th></tr></thead>
+            <tbody>
+              <tr><td>CLIP text encoder</td><td>Turns class descriptions into embeddings</td><td>No</td></tr>
+              <tr><td>DINO backbone</td><td>Produces visual features</td><td>No</td></tr>
+              <tr><td>DINO adapter</td><td>Connects DINO features to the class space</td><td>Yes</td></tr>
+              <tr><td>CLIP vision backbone</td><td>Produces CLIP image features</td><td>No</td></tr>
+              <tr><td>CLIP visual prompts</td><td>Adapt CLIP to the target collection</td><td>Yes</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>This is why the method is called <strong>parameter-efficient</strong>: it trains small additions instead of every parameter in both large models.</p>
+      </section>
+
+      <section id="evidence">
+        <h2>What the paper reports</h2>
+        <p>Across eleven datasets using CLIP ViT-B/32, the paper reports:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Method</th><th>Average top-1 accuracy</th></tr></thead>
+            <tbody>
+              <tr><td>Zero-shot CLIP</td><td>64.7%</td></tr>
+              <tr><td>LaFTer</td><td>73.0%</td></tr>
+              <tr><td><strong>NoLA</strong></td><td><strong>76.6%</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note"><strong>Important:</strong> these are values reported by the NoLA authors. They are not results reproduced in this repository yet.</p>
+        <p>The average is useful, but individual datasets tell a more honest story. NoLA reports a large improvement on the texture dataset DTD, while on EuroSAT it is slightly below LaFTer. A good reproduction should explain both successes and failures.</p>
+      </section>
+
+      <section>
+        <h2>The weak point we want to study</h2>
+        <p>NoLA initially selects pseudo-labels using classifier confidence. But neural networks can be <strong>confidently wrong</strong>, especially when the target images differ from their pretraining data.</p>
+        <p>Our proposed extension is called <strong>DINO-Neighbourhood Confidence (DNC)</strong>. It asks two questions before trusting an image:</p>
+        <ol>
+          <li>Is CLIP much more confident in its first choice than its second choice?</li>
+          <li>Do visually similar images in DINO space receive the same pseudo-label?</li>
+        </ol>
+        <p>If both answers are yes, the pseudo-label is probably safer. If CLIP is confident but nearby DINO images disagree, the example deserves less trust.</p>
+        <pre><code>reliability = α × semantic_margin
+            + (1 − α) × neighbour_agreement</code></pre>
+        <p>This is a hypothesis, not a claimed improvement. It must be tested against confidence-only selection, random selection, and a shuffled-neighbour control using the same sample budget.</p>
+      </section>
+
+      <section>
+        <h2>How I recommend reading the paper</h2>
+        <ol>
+          <li><strong>First pass:</strong> abstract, Figure 2, conclusion. Only identify the input, three stages, and output.</li>
+          <li><strong>Second pass:</strong> method section. Track which model creates each pseudo-label and which parameters learn.</li>
+          <li><strong>Third pass:</strong> Tables 1 and 3–7. Separate average gains from dataset-specific failures.</li>
+          <li><strong>Fourth pass:</strong> compare the equations with <code>code/nola-official/trainers/NoLA.py</code>.</li>
+        </ol>
+        <p>The full reading guide includes equation dimensions, code locations, critical questions, and marked exercises.</p>
+      </section>
+
+      <section id="videos">
+        <h2>Video resources</h2>
+        <p>You do not need to watch everything. Use these only when a concept remains unclear after the plain-English sections above.</p>
+
+        <div class="video-list">
+          <article>
+            <h3>1. CLIP paper explained</h3>
+            <p>Yannic Kilcher · 48 minutes. Watch this for contrastive image-text training and zero-shot classification.</p>
+            <div class="video-frame"><iframe src="https://www.youtube-nocookie.com/embed/T9XSU0pKX2E" title="OpenAI CLIP paper explained by Yannic Kilcher" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+            <p><a href="https://www.youtube.com/watch?v=T9XSU0pKX2E">Open on YouTube</a></p>
+          </article>
+
+          <article>
+            <h3>2. DINO paper explained</h3>
+            <p>Yannic Kilcher · 39 minutes. Watch this for self-distillation and why DINO features contain useful visual structure.</p>
+            <div class="video-frame"><iframe src="https://www.youtube-nocookie.com/embed/h3ij3F3cPIk" title="DINO paper explained by Yannic Kilcher" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+            <p><a href="https://www.youtube.com/watch?v=h3ij3F3cPIk">Open on YouTube</a></p>
+          </article>
+
+          <article>
+            <h3>3. Visual Prompt Tuning in five minutes</h3>
+            <p>Menglin Jia · ECCV 2022 · 5 minutes. Watch this before NoLA's final prompt-learning stage.</p>
+            <div class="video-frame"><iframe src="https://www.youtube-nocookie.com/embed/XKYDEDBPEXk" title="Visual Prompt Tuning ECCV 2022 presentation" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+            <p><a href="https://www.youtube.com/watch?v=XKYDEDBPEXk">Open on YouTube</a></p>
+          </article>
+        </div>
+      </section>
+
+      <section id="resources">
+        <h2>Files and links</h2>
+        <ul class="resource-list">
+          <li><a href="resources/NoLA_Paper_Reading_Guide.pdf"><strong>Paper reading guide</strong></a> — 12-page explanation, equations, code map, and marked exercises.</li>
+          <li><a href="https://bmvc2025.bmva.org/proceedings/281/"><strong>Original BMVC 2025 paper</strong></a> — the source paper and supplementary material.</li>
+          <li><a href="https://github.com/fazliimam/NoLA"><strong>Official NoLA implementation</strong></a> — upstream authors' repository.</li>
+        </ul>
+      </section>
+
+      <footer class="article-footer">
+        <p>Based on Imam et al., <cite>CLIP meets DINO for Tuning Zero-Shot Classifier using Unlabeled Image Collections</cite>, BMVC 2025.</p>
+        <p>Research notes by <a href="https://www.linkedin.com/in/chathuka-elapatha-911827291/">Chathuka Elapatha</a>. Paper results and proposed project ideas are explicitly separated.</p>
+      </footer>
+    </article>
+  </main>
+</body>
+</html>
